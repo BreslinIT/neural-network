@@ -18,10 +18,13 @@ struct Connection {
 
 class Neuron {
 public:
-    Neuron(const unsigned weights, const int index);
+    Neuron(const int weights, const int index);
     std::string examineWeights(void); // prints the weight values and output value
     void setOutputVal(double outputVal) {m_outputVal = outputVal;}
     double getOutputVal(void) const {return m_outputVal;}
+    void setGradient(double gradient) {m_gradient = gradient;}
+    void resetConnections(void) {m_outputWeights.clear();}
+    void addConnection(Connection weights) {m_outputWeights.push_back(weights);}
     void feedForward(Layer &prevLayer);
     double activationFunction(double sum);
     double activationFunctionDerivative(double sum);
@@ -42,7 +45,7 @@ private:
 double Neuron::learningRate = 0.1;
 double Neuron::alpha = 0.45;
 
-Neuron::Neuron(const unsigned weights, const int index) {
+Neuron::Neuron(const int weights, const int index) {
     for (int i = 0; i < weights; i++) {
         m_outputWeights.push_back(Connection());
         m_outputWeights.back().weight = randomWeight();
@@ -101,10 +104,10 @@ void Neuron::calcHiddenGradients(Layer &nextLayer) {
 
 std::string Neuron::examineWeights() {
     std::string output = "";
-    output += "     Output value: " + std::to_string(m_outputVal) + "\n";
-    output += "     Connections (weight deltaWeight):\n";
+    output += std::to_string(m_outputVal) + "\n";
+    output += std::to_string(m_gradient) + "\n";
     for (Connection i:m_outputWeights) {
-        output += "         " + std::to_string(i.weight) + " " + std::to_string(i.deltaWeight) + "\n";
+        output += std::to_string(i.weight) + "\n" + std::to_string(i.deltaWeight) + "\n";
     }
     return output;
 }
@@ -159,25 +162,29 @@ void TrainingData::restart() {
 
 class Net {
 public:
-    Net(const std::vector<unsigned> &topology); // constructor which takes the shape of the network
+    Net(const std::vector<int> &topology); // constructor which takes the shape of the network
     void feedForward(const std::vector<double> &inputs); // feeds the inputs through the network, updating neuron outputs
     void backProp(const std::vector<double> &targets); // calculate root mean square error of each output neuron and update weights
     void getResults(std::vector<double> &results) const; // populates results vector
-    void train(const std::string dataName, const std::string targetName, const int iterations, const int outputRate);
+    void train(const std::string dataName, const std::string targetName, const int iterations, const int outputRate, const bool verbose);
+    void predict(const std::vector<double> &inputs, std::vector<double> &results);
     double getRecentAverageError(void) const { return m_recentAverageError; }
-    void printShape(void); // returns the shape of the network
-    void examineNeurons(void);
+    std::string printShape(void); // returns the shape of the network
+    std::string examineNeurons(void);
+    void saveWeights(const std::string fileName); // right now the topology has to be the same as the original network
+    void loadWeights(const std::string fileName); // right now the topology has to be the same as the original network
 private:
     std::vector<Layer> m_layers; // m_layers[layer][neuron]
     double m_error;
     double m_recentAverageError;
     static double m_recentAverageSmoothingFactor;
+    std::fstream m_saveFile;
 };
 
 double Net::m_recentAverageSmoothingFactor = 10.0;
 
-Net::Net(const std::vector<unsigned> &topology) {
-    unsigned numLayers = topology.size();
+Net::Net(const std::vector<int> &topology) {
+    int numLayers = topology.size();
 
     for (int i=0; i<numLayers; i++) {
         m_layers.push_back(Layer());
@@ -256,7 +263,7 @@ void Net::getResults(std::vector<double> &results) const {
     }
 }
 
-void Net::train(const std::string dataName, const std::string targetName, const int iterations, const int outputRate=10) {
+void Net::train(const std::string dataName, const std::string targetName, const int iterations, const int outputRate=10, const bool verbose=true) {
     TrainingData data(dataName, targetName);
 
     std::vector<double> inputs;
@@ -272,67 +279,140 @@ void Net::train(const std::string dataName, const std::string targetName, const 
 
         data.populateTargets(targets);
         backProp(targets);
-        if (i%outputRate==0) {
-            std::cout << "inputs: ";
-            for (double i:inputs) {
-                std::cout << i << " ";
-            }
-            std::cout << "\n";
+        if (verbose){
+            if (i%outputRate==0) {
+                std::cout << "inputs: ";
+                for (double i:inputs) {
+                    std::cout << i << " ";
+                }
+                std::cout << "\n";
 
-            std::cout << "target: ";
-            for (double i:targets) {
-                std::cout << i << " ";
-            }
-            std::cout << "\n";
+                std::cout << "target: ";
+                for (double i:targets) {
+                    std::cout << i << " ";
+                }
+                std::cout << "\n";
 
-            std::cout << "output: ";
-            getResults(results);
-            for (double i:results) {
-                std::cout << i << " ";
-            }
-            std::cout << "\n";
+                std::cout << "output: ";
+                getResults(results);
+                for (double i:results) {
+                    std::cout << i << " ";
+                }
+                std::cout << "\n";
 
-            std::cout << "recent average error: " << getRecentAverageError() << "\n";
-            std::cout << "error: " << m_error << "\n";
-            std::cout << "\n";
+                std::cout << "recent average error: " << getRecentAverageError() << "\n";
+                std::cout << "error: " << m_error << "\n";
+                std::cout << "\n";
+            }
         }
     }
 }
 
-void Net::printShape() {
-    std::cout << "Number of layers: " << m_layers.size() << "\n";
-    std::cout << "Layer sizes:";
+void Net::predict(const std::vector<double> &inputs, std::vector<double> &results) {
+    feedForward(inputs);
+    getResults(results);
+}
+
+std::string Net::printShape() {
+    std::string output = "";
+    output += std::to_string(m_layers.size()) + "\n";
     for (Layer i:m_layers) {
-        std::cout << " " << i.size()-1;
+        output += std::to_string(i.size()) + "\n";
     }
-    std::cout << "\nThere is actually one more neuron is each layer; the bias neuron. This neuron does nothing in the last layer.\n";
+    return output;
 }
 
-void Net::examineNeurons() {
+std::string Net::examineNeurons() {
+    std::string output = "";
     for (int i = 0; i<m_layers.size(); i++) {
-        if (i != m_layers.size()-1) {
-            std::cout << "Layer " << i+1 << ":\n";
-        }
-        else {
-            std::cout << "Output layer:\n";
-        }
         for (int j = 0; j < m_layers[i].size(); j++) {
-            if (j != m_layers[i].size()-1) {
-                std::cout << "  Neuron " << j+1 << ":\n" << m_layers[i][j].examineWeights();
-            }
-            else {
-                std::cout << "  Bias Neuron:\n" << m_layers[i][j].examineWeights();
+            output += m_layers[i][j].examineWeights();
+        }
+    }
+    return output;
+}
+
+void Net::saveWeights(const std::string fileName) {
+    m_saveFile.open(fileName);
+    m_saveFile << printShape();
+    m_saveFile << examineNeurons();
+    m_saveFile.close();
+}
+void Net::loadWeights(const std::string fileName) {
+    m_saveFile.open(fileName);
+    std::string line;
+    std::string::size_type sz;
+
+    getline(m_saveFile,line);
+    int layers = stoi(line);
+    assert(layers == m_layers.size());
+    int neurons;
+    std::vector<int> topology;
+    for (int i = 0; i < layers; i++) {
+        getline(m_saveFile,line);
+        neurons = stoi(line);
+        assert(neurons == m_layers[i].size());
+        topology.push_back(neurons);
+    }
+
+    double weight;
+    for (int i = 0; i < topology.size(); i++) {
+        for (int j = 0; j < topology[i]; j++) {
+            getline(m_saveFile,line);
+            weight = stod(line,&sz);
+            m_layers[i][j].setOutputVal(weight); // this is the output val
+
+            getline(m_saveFile,line);
+            weight = stod(line,&sz);
+            m_layers[i][j].setGradient(weight); // this is the gradient
+            if (i != topology.size()) {
+                m_layers[i][j].resetConnections();
+                for (int k = 0; k < topology[i+1]-1; k++) {
+                    Connection weights;
+                    getline(m_saveFile,line);
+                    weight = stod(line,&sz);
+                    weights.weight = weight;
+
+                    getline(m_saveFile,line);
+                    weight = stod(line,&sz);
+                    weights.deltaWeight = weight;
+
+                    m_layers[i][j].addConnection(weights);
+                }  // num neurons in next layer to determine connections
             }
         }
     }
+
+
+    m_saveFile.close();
 }
 
 int main() {
-    std::vector<unsigned> topology;
+    std::vector<int> topology;
     topology.push_back(1);
     topology.push_back(4);
     topology.push_back(1);
     Net new_net(topology);
 
-    new_net.train("testData.txt", "testTargets.txt",2000,1);
+    std::vector<double> input; 
+    input.push_back(0.6136913399114866);
+    std::vector<double> results;
+
+    new_net.predict(input,results);
+
+    for (double i:results) {
+        std::cout << i << "\n";
+    }
+    new_net.loadWeights("weights.weights");
+    //new_net.train("testData.txt", "testTargets.txt",2000,1,false);
+
+    new_net.predict(input,results);
+
+    for (double i:results) {
+        std::cout << i << "\n";
+    }
+    
+    //new_net.loadWeights("weights.weights");
+    //new_net.train("testData.txt", "testTargets.txt",2000,1);
+    //new_net.saveWeights("weights.weights");
 }
