@@ -8,8 +8,8 @@
 #include <fstream>
 #include "network.h"
 
-double Neuron::learningRate = 0.1;
-double Neuron::alpha = 0.45;
+double Neuron::learningRate = 0.2;
+double Neuron::alpha = 0.7;
 
 Neuron::Neuron(const int weights, const int index) {
     for (int i = 0; i < weights; i++) {
@@ -25,7 +25,7 @@ double Neuron::activationFunction(double sum) {
 }
 
 double Neuron::activationFunctionDerivative(double sum) {
-    return 1-(sum*sum);
+    return 2/(1 + cosh(2*sum));
 }
 
 void Neuron::feedForward(Layer &prevLayer) {
@@ -88,7 +88,7 @@ void TrainingData::populateInputs(std::vector<double> &inputs) {
     std::string line;
     std::string::size_type sz;
     getline(m_trainingData,line);
-    while ((int)line[0] != 97 && !isDataEOF()) {
+    while ((int)line[0] != 47 && !isDataEOF()) {
         inputs.push_back(std::stod(line,&sz));
         getline(m_trainingData,line);
     }
@@ -99,7 +99,7 @@ void TrainingData::populateTargets(std::vector<double> &targets) {
     std::string line;
     std::string::size_type sz;
     getline(m_trainingTargets,line);
-    while ((int)line[0] != 97 && !isTargetEOF()) {
+    while ((int)line[0] != 47 && !isTargetEOF()) {
         targets.push_back(std::stod(line,&sz));
         getline(m_trainingTargets,line);
     }
@@ -321,14 +321,13 @@ void Net::loadWeights(const std::string fileName) {
 
 int main() {
     std::vector<int> topology;
-    topology.push_back(1);
+    topology.push_back(2);
     topology.push_back(4);
     topology.push_back(1);
     Net new_net(topology);
-    
-    //new_net.train("testData.txt", "testTargets.txt",2000,1,false);
+
+    new_net.train("testData.txt", "testTargets.txt",5000,1);
     
     //new_net.loadWeights("weights.weights");
-    //new_net.train("testData.txt", "testTargets.txt",2000,1);
     //new_net.saveWeights("weights.weights");
 }

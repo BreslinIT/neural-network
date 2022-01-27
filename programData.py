@@ -18,5 +18,5 @@ with open("testData.txt","w") as data:
 		options = [-1.0,0.0,1.0]
 		for i in range(50000):
 			x = random.random();
-			data.write(str(x)+"\na\n")
-			targets.write(str(sigmoid(x))+"\na\n")
+			data.write(str(x)+"\n/\n")
+			targets.write(str(sigmoid(x))+"\n/\n")
