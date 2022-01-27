@@ -4,8 +4,8 @@ import math
 
 font = cv.FONT_HERSHEY_SIMPLEX
 
-IMAGE_WIDTH = 1080
-IMAGE_HEIGHT = 700
+IMAGE_WIDTH = 1280
+IMAGE_HEIGHT = 800
 
 INPUT_COLOR = (42, 133, 212)
 OUTPUT_COLOR = (237, 81, 38)
@@ -28,7 +28,10 @@ with open("weights.weights","r") as weights:
     num_layers = int(weights.readline())
     
     for i in range(num_layers):
-        layer_neurons.append(int(weights.readline()))
+        if i != num_layers-1:
+            layer_neurons.append(int(weights.readline()))
+        else:
+            layer_neurons.append(int(weights.readline())-1)
     
     for count,i in enumerate(layer_neurons):
         outputs.append([])
@@ -66,6 +69,7 @@ def drawWeights(layerNum, index):
             color = (255,0,0)
         cv.line(img,all_centers[layerNum][index],all_centers[layerNum+1][i],color,int(abs(3*all_weights[layerNum][index][i][0]))+1)
 
+
 def calcCenters(layerNum):
     centers = []
     for index in range(layer_neurons[layerNum]):
@@ -87,8 +91,9 @@ def drawCircle(layerNum, index):
     if layerNum==num_layers-1:
         color = OUTPUT_COLOR
 
+    cv.circle(img, all_centers[layerNum][index], 43, (0,0,0),-1)
     cv.circle(img, all_centers[layerNum][index], 40, color,-1)
-    #cv.putText(img,str(gradients[layerNum][index]),center, font, 0.5,(255,255,255),1,cv.LINE_AA)
+    #cv.putText(img,str(outputs[layerNum][index]),all_centers[layerNum][index], font, 0.5,(255,255,255),1,cv.LINE_AA)
 
 
 for i in range(num_layers):
