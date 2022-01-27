@@ -10,6 +10,7 @@ This is a neural network that I made with the help of https://www.youtube.com/wa
 ## things I want to do:
 - improve overall documentation
 - create muliple activation functions
+- batch size
 - make an easier interface for choosing constants such as learning rate
 - create a gui for training and testing
 - find a way to visually represent the network (maybe add an animation)
