@@ -6,10 +6,13 @@
 #include <assert.h>
 #include <cmath>
 #include <fstream>
+#include <time.h>
 #include "network.h"
 
-double Neuron::learningRate = 0.1;
-double Neuron::alpha = 0.7;
+double Neuron::learningRate = 0.15;
+double Neuron::alpha = 0.5;
+
+
 
 Neuron::Neuron(const int weights, const int index) {
     for (int i = 0; i < weights; i++) {
@@ -116,6 +119,7 @@ void TrainingData::restart() {
 double Net::m_recentAverageSmoothingFactor = 10.0;
 
 Net::Net(const std::vector<int> &topology) {
+    srand(time(NULL));
     int numLayers = topology.size();
 
     for (int i=0; i<numLayers; i++) {
@@ -195,14 +199,14 @@ void Net::getResults(std::vector<double> &results) const {
     }
 }
 
-void Net::train(const std::string dataName, const std::string targetName, const int iterations, const int outputRate=10, const bool verbose=true) {
+void Net::train(const std::string dataName, const std::string targetName, const int iterations, const int outputRate=1, const bool verbose=true) {
     TrainingData data(dataName, targetName);
 
     std::vector<double> inputs;
     std::vector<double> targets;
     std::vector<double> results;
 
-    for (int i = 0; i < iterations; i++) {
+    for (int iteration = 0; iteration < iterations; iteration++) {
         if (data.isDataEOF() || data.isTargetEOF()) {
             data.restart();
         }
@@ -212,7 +216,7 @@ void Net::train(const std::string dataName, const std::string targetName, const 
         data.populateTargets(targets);
         backProp(targets);
         if (verbose){
-            if (i%outputRate==0) {
+            if (iteration%outputRate==0) {
                 std::cout << "inputs: ";
                 for (double i:inputs) {
                     std::cout << i << " ";
@@ -234,6 +238,7 @@ void Net::train(const std::string dataName, const std::string targetName, const 
 
                 std::cout << "recent average error: " << getRecentAverageError() << "\n";
                 std::cout << "error: " << m_error << "\n";
+                std::cout << "total iterations: " << iteration+1 << "\n";
                 std::cout << "\n";
             }
         }
@@ -323,16 +328,17 @@ int main() {
     std::vector<int> topology;
     topology.push_back(2);
     topology.push_back(4);
-    topology.push_back(4);
+    topology.push_back(3);
     topology.push_back(1);
     Net new_net(topology);
 
-    new_net.train("testData.txt", "testTargets.txt",10000,1);
+
+    new_net.train("testData.txt", "testTargets.txt",10000);
     
     // new_net.loadWeights("weights.weights");
     // std::vector<double> test;
     // test.push_back(0.0);
-    // test.push_back(0.0);
+    // test.push_back(1.0);
     // new_net.feedForward(test);
     new_net.saveWeights("weights.weights");
 }
