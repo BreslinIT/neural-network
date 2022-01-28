@@ -34,10 +34,10 @@ public:
                                         // This neuron's output value is updated to activationFunction(sum)
     double activationFunction(double sum); // Returns tanh(sum)
     double activationFunctionDerivative(double sum); // Returns 2/(1 + cosh(2*sum)) (this is the derivative of tanh(sum))
-    void calcOutputGradients(double target); // TODO: figure out wtf this is doing
-    void calcHiddenGradients(Layer &nextLayer); // TODO: figure out wtf this is doing
-    double sumDOW(const Layer &nextLayer); // TODO: figure out wtf this is doing
-    void updateInputWeights(Layer &prevLayer); // TODO: this is doing some crazy shit asw
+    void calcOutputGradients(double target); // Figures out how to change the output gradient to minimize loss
+    void calcHiddenGradients(Layer &nextLayer); // TODO: not sure what this is doing
+    double sumDOW(const Layer &nextLayer); // Figures out how much of an impact a specific neuron had on the overall loss (I think)
+    void updateInputWeights(Layer &prevLayer); // TODO: not sure what this is doing
 private:
     static double randomWeight() {return rand() / double(RAND_MAX);} // Returns a number in the range [0.0 1.0]
     double m_outputVal; // The value that the neuron passes on during feedForward
@@ -137,7 +137,7 @@ public:
 private:
     std::vector<Layer> m_layers; // m_layers[layer][neuron]
     double m_error; // Root mean squared error
-    double m_recentAverageError; // TODO: figure this out
+    double m_recentAverageError; // Smoothed average error
     static double m_recentAverageSmoothingFactor; // This affects the recentAverageError
     std::fstream m_saveFile;
 };
