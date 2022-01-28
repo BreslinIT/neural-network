@@ -2,7 +2,7 @@ import numpy as np
 import cv2 as cv
 import math
 
-font = cv.FONT_HERSHEY_SIMPLEX
+font = cv.FONT_HERSHEY_DUPLEX
 
 IMAGE_WIDTH = 1280
 IMAGE_HEIGHT = 800
@@ -93,7 +93,8 @@ def drawCircle(layerNum, index):
 
     cv.circle(img, all_centers[layerNum][index], 43, (0,0,0),-1)
     cv.circle(img, all_centers[layerNum][index], 40, color,-1)
-    #cv.putText(img,str(outputs[layerNum][index]),all_centers[layerNum][index], font, 0.5,(255,255,255),1,cv.LINE_AA)
+    cv.putText(img,str(outputs[layerNum][index]),(int(all_centers[layerNum][index][0]-(((len(str(outputs[layerNum][index])))*9)/2)),all_centers[layerNum][index][1]), font, 0.45,(255,255,255),1,cv.LINE_AA)
+    cv.putText(img,str(gradients[layerNum][index]),(int(all_centers[layerNum][index][0]-(((len(str(gradients[layerNum][index])))*9)/2)),all_centers[layerNum][index][1]+60), font, 0.45,(0,0,0),1,cv.LINE_AA)
 
 
 for i in range(num_layers):

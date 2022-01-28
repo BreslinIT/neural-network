@@ -8,8 +8,8 @@
 #include <fstream>
 #include "network.h"
 
-double Neuron::learningRate = 0.15;
-double Neuron::alpha = 0.5;
+double Neuron::learningRate = 0.1;
+double Neuron::alpha = 0.7;
 
 Neuron::Neuron(const int weights, const int index) {
     for (int i = 0; i < weights; i++) {
@@ -323,11 +323,16 @@ int main() {
     std::vector<int> topology;
     topology.push_back(2);
     topology.push_back(4);
+    topology.push_back(4);
     topology.push_back(1);
     Net new_net(topology);
 
     new_net.train("testData.txt", "testTargets.txt",10000,1);
     
-    //new_net.loadWeights("weights.weights");
+    // new_net.loadWeights("weights.weights");
+    // std::vector<double> test;
+    // test.push_back(0.0);
+    // test.push_back(0.0);
+    // new_net.feedForward(test);
     new_net.saveWeights("weights.weights");
 }
