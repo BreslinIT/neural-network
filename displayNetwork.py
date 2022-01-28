@@ -2,6 +2,8 @@ import numpy as np
 import cv2 as cv
 import math
 
+WEIGHTS_FILE = "weights.weights"
+
 font = cv.FONT_HERSHEY_DUPLEX
 
 IMAGE_WIDTH = 1280
@@ -24,7 +26,7 @@ all_weights = []
 weight = 0.0
 deltaWeight = 0.0
 
-with open("weights.weights","r") as weights:
+with open(WEIGHTS_FILE,"r") as weights:
     num_layers = int(weights.readline())
     
     for i in range(num_layers):
@@ -108,10 +110,7 @@ for i in range(num_layers):
     for j in range(layer_neurons[i]):
         drawCircle(i,j)
 
-cv.imshow('image',img)
+cv.imshow(WEIGHTS_FILE,img)
 cv.waitKey(0)
 
 cv.destroyAllWindows()
-
-
-#(IMAGE_HEIGHT-((150*numNeurons)+radius*2))//2

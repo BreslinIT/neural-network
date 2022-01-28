@@ -16,9 +16,10 @@ struct Connection {
 
 class Neuron {
 public:
-    Neuron(const int weights, const int index); // Making a neuron requires the number of neurons in the next layer (minus the bias neuron)
-                                                // (thisNeuron -> nextNeuron) for every neuron in the next layer. Also, neurons need to know
-                                                // their position in the layer.
+    // Making a neuron requires the number of neurons in the next layer (minus the bias neuron)
+    // (thisNeuron -> nextNeuron) for every neuron in the next layer. Neurons also need to know their position in the layer, learning
+    // rate, and alpha constant.
+    Neuron(const int weights, const int index, double learningRate, double alpha); 
     std::string examineWeights(void); // Returns a string in the format: "for every neuron:     outputVal
                                       //                                                        gradient
                                       //                                  for every connection: weight
@@ -43,8 +44,8 @@ private:
     std::vector<Connection> m_outputWeights; // The length of m_outputWeights is equal to the size of the next layer -1 (for bias neuron)
     int m_index; // Neuron's position in the layer
     double m_gradient; // TODO: used in back propagation somehow
-    static double learningRate; // Used when updating weights. 0.2 is medium.
-    static double alpha; // Multiplied by the previous deltaWeight when updating weights. 0.5 is medium.
+    double m_learningRate; // Used when updating weights. 0.2 is medium.
+    double m_alpha; // Multiplied by the previous deltaWeight when updating weights. 0.5 is medium.
 };
 
 class TrainingData {
@@ -95,14 +96,15 @@ private:
 
 class Net {
 public:
-    Net(const std::vector<int> &topology); // To create a new network you only need to input the desired topolgy.
+    // To create a new network you only need to input the desired topolgy, the learning rate of each neuron, and the alpha constant of each neuron.
+    Net(const std::vector<int> &topology, double learningRate, double alpha);
     void feedForward(const std::vector<double> &inputs); // Sets the output values of each neuron (except bias) in the first layer to match
                                                          // the input vector. The input vector must be the same size as the first layer.
     void backProp(const std::vector<double> &targets); // TODO: some of this makes sense. Some of it does not.
     void getResults(std::vector<double> &results) const; // Fills the passed vector with the current output values of the final layer.
 
-    // Training takes the path of the data file and the target file, the number of training steps, the information output rate, and
-    // a boolean deciding if anything is output at all.
+    // Training takes the path of the data file and the target file, the number of training steps, the information output rate, and a
+    // boolean deciding if anything is output at all.
     // It does the following steps once for every iteration:
     // It runs feedForward with the next inputs from the data file and backProp with the next targets from the target file. If either
     // of these files reaches the EOF, they are both reset.

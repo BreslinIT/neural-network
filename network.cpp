@@ -9,12 +9,10 @@
 #include <time.h>
 #include "network.h"
 
-double Neuron::learningRate = 0.15;
-double Neuron::alpha = 0.5;
 
-
-
-Neuron::Neuron(const int weights, const int index) {
+Neuron::Neuron(const int weights, const int index, double learningRate, double alpha) {
+    m_learningRate = learningRate;
+    m_alpha = alpha;
     for (int i = 0; i < weights; i++) {
         m_outputWeights.push_back(Connection());
         m_outputWeights.back().weight = randomWeight();
@@ -54,7 +52,7 @@ void Neuron::updateInputWeights(Layer &prevLayer) {
         Neuron &neuron = prevLayer[i];
         double oldDeltaWeight = neuron.m_outputWeights[m_index].deltaWeight;
 
-        double newDeltaWeight = (learningRate * neuron.getOutputVal() * m_gradient) + (alpha * oldDeltaWeight);
+        double newDeltaWeight = (m_learningRate * neuron.getOutputVal() * m_gradient) + (m_alpha * oldDeltaWeight);
 
         neuron.m_outputWeights[m_index].deltaWeight = newDeltaWeight;
         neuron.m_outputWeights[m_index].weight += newDeltaWeight;
@@ -118,7 +116,7 @@ void TrainingData::restart() {
 
 double Net::m_recentAverageSmoothingFactor = 10.0;
 
-Net::Net(const std::vector<int> &topology) {
+Net::Net(const std::vector<int> &topology, double learningRate=0.2, double alpha=0.5) {
     srand(time(NULL));
     int numLayers = topology.size();
 
@@ -126,10 +124,10 @@ Net::Net(const std::vector<int> &topology) {
         m_layers.push_back(Layer());
         for (int j = 0; j <= topology[i]; j++) {
             if (i<numLayers-1) {
-                m_layers.back().push_back(Neuron(topology[i+1],j));
+                m_layers.back().push_back(Neuron(topology[i+1],j,learningRate,alpha));
             } // if we are not on the final layer, the neuron will have n weights where n is the number of neurons in the next layer
             else {
-                m_layers.back().push_back(Neuron(0,j));
+                m_layers.back().push_back(Neuron(0,j,learningRate,alpha));
             } // if we are on the final layer, the neuron will have 0 weights.
         }
         m_layers.back().back().setOutputVal(1.0);
