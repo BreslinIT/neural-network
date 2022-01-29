@@ -16,3 +16,4 @@ This is a neural network that I made with the help of https://www.youtube.com/wa
 - batch size
 - create a gui for training and testing
 - add an animation to the network visualizer
+- make a deep Q network
