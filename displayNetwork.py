@@ -1,6 +1,5 @@
 import numpy as np
 import cv2 as cv
-import math
 
 WEIGHTS_FILE = "weights.weights"
 
@@ -109,8 +108,6 @@ for i in range(num_layers-1):
 for i in range(num_layers):
     for j in range(layer_neurons[i]):
         drawCircle(i,j)
-
-cv.imshow(WEIGHTS_FILE,img)
-cv.waitKey(0)
-
-cv.destroyAllWindows()
+        
+cv.putText(img,"9999",(IMAGE_WIDTH-100,IMAGE_HEIGHT-50),font,0.8,(0,0,0),1,cv.LINE_AA)
+cv.imwrite("displayImages/test.jpg",img)

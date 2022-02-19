@@ -7,6 +7,7 @@
 #include <cmath>
 #include <fstream>
 #include <time.h>
+#include <experimental/filesystem>
 #include "network.h"
 
 
@@ -197,7 +198,18 @@ void Net::getResults(std::vector<double> &results) const {
     }
 }
 
-void Net::train(const std::string dataName, const std::string targetName, const int iterations, const int outputRate=1, const bool verbose=true) {
+void Net::train(const std::string dataName, const std::string targetName, const int iterations, const bool verbose=true, const bool createGif=false, const int outputRate=1) {
+    int frames = 1;
+    if (createGif) {
+        if (iterations > 300) {
+            frames = iterations/300;
+        }
+        for (const auto& entry : std::experimental::filesystem::directory_iterator("weights")) {
+            std::experimental::filesystem::remove(entry.path());
+        }
+    }
+    
+    
     TrainingData data(dataName, targetName);
 
     std::vector<double> inputs;
@@ -240,6 +252,12 @@ void Net::train(const std::string dataName, const std::string targetName, const 
                 std::cout << "\n";
             }
         }
+        if (createGif) {
+            if (iteration%frames == 0) {
+                std::string fileName = "weights/" + std::to_string(iteration) + ".weights";
+                saveWeights(fileName);
+            }
+        }
     }
 }
 
@@ -268,7 +286,7 @@ std::string Net::examineNeurons() {
 }
 
 void Net::saveWeights(const std::string fileName) {
-    m_saveFile.open(fileName);
+    m_saveFile.open(fileName,std::fstream::out);
     m_saveFile << printShape();
     m_saveFile << examineNeurons();
     m_saveFile.close();
@@ -330,8 +348,7 @@ int main() {
     topology.push_back(1);
     Net new_net(topology);
 
-
-    new_net.train("testData.txt", "testTargets.txt",10000);
+    new_net.train("testData.txt", "testTargets.txt",2000,true,true);
     
     // new_net.loadWeights("weights.weights");
     // std::vector<double> test;

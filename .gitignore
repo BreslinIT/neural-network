@@ -1,2 +1,6 @@
 a.out
-weights.weights
+*.weights
+.vscode
+network
+*.gif
+weights/*

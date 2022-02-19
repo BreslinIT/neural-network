@@ -108,7 +108,7 @@ public:
     // It does the following steps once for every iteration:
     // It runs feedForward with the next inputs from the data file and backProp with the next targets from the target file. If either
     // of these files reaches the EOF, they are both reset.
-    void train(const std::string dataName, const std::string targetName, const int iterations, const int outputRate, const bool verbose);
+    void train(const std::string dataName, const std::string targetName, const int iterations, const bool verbose, const bool createGif, const int outputRate);
     void predict(const std::vector<double> &inputs, std::vector<double> &results); // Runs feedForward on the inputs and populates results vector
     double getRecentAverageError(void) const { return m_recentAverageError; }
     std::string printShape(void); // Returns the shape of the network
