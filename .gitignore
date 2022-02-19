@@ -1,6 +1,5 @@
-a.out
+*.out
 *.weights
 .vscode
 network
-*.gif
-weights/*
+/*.gif
