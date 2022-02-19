@@ -9,7 +9,7 @@ This is a neural network that I made with the help of https://www.youtube.com/wa
 - a way to visually represent the network
 ![image of network visualization tool](images/visualizer.jpg?raw=true)
 - make an easier interface for choosing constants such as learning rate (maybe improve this)
-- python script to create a gif of the network trainging
+- python script to create a gif of the network training
 ![gif of network training for 2000 iterations](images/2000.gif?raw=true)
 
 ## things I want to add:
