@@ -7,7 +7,6 @@ This is a neural network that I made with the help of https://www.youtube.com/wa
 - added some stuff for looking at the network in depth
 - some python scripting for generating training data and targets
 - a way to visually represent the network
-![image of network visualization tool](images/visualizer.jpg?raw=true)
 - make an easier interface for choosing constants such as learning rate (maybe improve this)
 - add an animation to the network visualizer
 ![gif of network training for 2000 iterations](images/2000.gif?raw=true)
